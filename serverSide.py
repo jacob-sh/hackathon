@@ -1,12 +1,16 @@
 from socket import *
 from struct import *
 from random import *
+import copy
 import time
 import threading
-def groupNames(lst) :
+def groupNames(lst, id) :
     names = ''
-    for tpl in lst :
-        names += tpl[0]+'\n'
+    i = 0
+    while i < len(lst) :
+        if (lst[i][2] == id) :
+            names += lst[i][0]+'\n'
+        i += 1
     return names
 
 def sendBroadcast() :
@@ -35,48 +39,44 @@ def sendBroadcast() :
             print("message sent!")
             i += 1
             time.sleep(1)
+        temp = 0
         while True:
             try:
                 connectionSocket, addr = serverSocket.accept()
                 clientName = connectionSocket.recv(2048)
                 connectionSocket.setblocking(False)
-                clientList.append((clientName.decode(), connectionSocket))
+                if(temp % 2 == 0):
+                    clientList.append((clientName.decode(), connectionSocket, 1))
+                else:
+                    clientList.append((clientName.decode(), connectionSocket, 2))
             except:
                 break
-        group1 = list()
-        group2 = list()
-        j = len(clientList)
-        while j > 0 :
-            if(j % 2 == 1) :
-                group1.append(clientList.pop(randrange(j)))
-            else :
-                group2.append(clientList.pop(randrange(j)))
-            j =- 1
-        gameStartMsg = 'Welcome to Keyboard Spamming Battle Royale.\nGroup 1:\n==\n' + groupNames(group1) + 'Group2:\n==\n' + groupNames(group2)+ '\nStart pressing keys on your keyboard as fast as you can!!\n'
-        scoreList1 = list()
-        scoreList2 = list()
+            temp += 1
+        gameStartMsg = 'Welcome to Keyboard Spamming Battle Royale.\nGroup 1:\n==\n' + groupNames(clientList, 1) + 'Group 2:\n==\n' + groupNames(clientList, 2)+ '\nStart pressing keys on your keyboard as fast as you can!!\n'
+        scoreList = list()
         endMsgList = list()
-        for tpl in group1 :
-            threading.Thread(target = gaming, args = (tpl[0], tpl[1], scoreList1, gameStartMsg, endMsgList)).start()
-        for tpl in group2 :
-            threading.Thread(target = gaming, args = (tpl[0], tpl[1], scoreList2, gameStartMsg, endMsgList)).start()
-        while (len(scoreList1) < len(group1)) | (len(scoreList2) < len(group2)):
+        for tpl in clientList :
+            threading.Thread(target = gaming, args = (tpl[2], tpl[1], scoreList, gameStartMsg, endMsgList)).start()
+        while (len(scoreList) < len(clientList)):
             time.sleep(1)
         sum1 = 0
         sum2 = 0
-        for result in scoreList1 :
-            sum1 += result
-        for result in scoreList2 :
-            sum2 += result
+        for result in scoreList :
+            if(result[1] == 1):
+                sum1 += result[0]
+            else:
+                sum2 += result[0]
         if(sum1 > sum2):
-            winnerInfo = ('Group1' , groupNames(group1))
+            winnerInfo = ('Group 1' , groupNames(clientList, 1))
         else:
-            winnerInfo = ('Group2' , groupNames(group2))
+            winnerInfo = ('Group 2' , groupNames(clientList, 2))
         endMsgList.append('Game over!\nGroup 1 typed in ' + str(sum1) + ' characters. Group 2 typed in ' + str(sum2) + ' characters.\n' + winnerInfo[0] + ' wins!\n\nCongratulations to the winners:\n==\n' + winnerInfo[1])
         print ('Game over, sending out offer requests...')
+        serverSocket.close()
+        serverBroadcast.close()
 
 #gaming
-def gaming (name, sock, scoreList, startMsg, endMsg) :
+def gaming (id, sock, scoreList, startMsg, endMsg) :
     sock.send(startMsg.encode())
     lst = list()
     timeout = time.time() + 10
@@ -86,7 +86,7 @@ def gaming (name, sock, scoreList, startMsg, endMsg) :
             lst.append(sentChar.decode())
         except:
             continue
-    scoreList.append(len(lst))
+    scoreList.append((len(lst), id))
     while len(endMsg) == 0 :
         time.sleep(1)
     sock.send(endMsg[0].encode())

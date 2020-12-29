@@ -1,9 +1,20 @@
 from socket import *
 from struct import *
 from random import *
-import copy
 import time
 import threading
+
+# color escape codes:
+# Black: \u001b[30m
+# Red: \u001b[31m
+# Green: \u001b[32m
+# Yellow: \u001b[33m
+# Blue: \u001b[34m
+# Magenta: \u001b[35m
+# Cyan: \u001b[36m
+# White: \u001b[37m
+# Reset: \u001b[0m
+
 def groupNames(lst, id) :
     names = ''
     i = 0
@@ -17,7 +28,7 @@ def sendBroadcast() :
     while True:
         serverPort = 12000
         serverSocket = socket(AF_INET, SOCK_STREAM)
-        serverSocket.setsockopt(SOL_SOCKET, SO_REUSEPORT, 1)
+        #serverSocket.setsockopt(SOL_SOCKET, SO_REUSEPORT, 1)   #LINUX
         serverSocket.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
         serverSocket.setblocking(False)
         serverSocket.bind(('', serverPort))
@@ -27,14 +38,12 @@ def sendBroadcast() :
         serverBroadcast = socket(AF_INET, SOCK_DGRAM)
 
         # Enable broadcasting mode
-        serverBroadcast.setsockopt(SOL_SOCKET, SO_REUSEPORT, 1)
+        #serverBroadcast.setsockopt(SOL_SOCKET, SO_REUSEPORT, 1)    #LINUX
         serverBroadcast.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
         serverBroadcast.setsockopt(SOL_SOCKET, SO_BROADCAST, 1)
+        serverBroadcast.setblocking(False)
 
-        # Set a timeout so the socket does not block
-        # indefinitely when trying to receive data.
-        serverBroadcast.settimeout(0.2)
-        print("Server started, listening on IP address 127.0.0.1")
+        print("Server started...")
         clientList = list()
         i = 0
         while i < 10 :

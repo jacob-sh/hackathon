@@ -1,18 +1,19 @@
 from socket import *
 from struct import *
-import msvcrt
+import getch
 import time
 
 while True:
     print ('Client started, listening for offer requests')
     serverPort = 0
     clientBroadcast = socket(AF_INET, SOCK_DGRAM)
+    clientBroadcast.setsockopt(SOL_SOCKET, SO_REUSEPORT, 1)
     clientBroadcast.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
     clientBroadcast.setsockopt(SOL_SOCKET, SO_BROADCAST, 1)
     clientBroadcast.bind(("", 13117))
     data, serverName = clientBroadcast.recvfrom(1024)
-    unpackedData = unpack('qqq', data)
-    if ((unpackedData[0] != 0xfeedbeef) | (unpackedData[1] != 0x2)) :
+    unpackedData = unpack('!IBH', data)
+    if ((unpackedData[0] != 0xfeedbeef) | (unpackedData[1] != 0x02)) :
         #return to more broadcast
         clientBroadcast.close()
     else :
@@ -27,9 +28,9 @@ while True:
         print (gameStartMsg)
         timeout = time.time() + 10
         while time.time() < timeout :
-            c = msvcrt.getch()
+            c = getch.getch()
             if time.time() < timeout :
-                clientSocket.send(c)
+                clientSocket.send(c.encode())
 
         endMsg = clientSocket.recv(2048).decode()
         print ("%s"%endMsg)

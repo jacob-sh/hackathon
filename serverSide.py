@@ -17,6 +17,8 @@ def sendBroadcast() :
     while True:
         serverPort = 12000
         serverSocket = socket(AF_INET, SOCK_STREAM)
+        serverSocket.setsockopt(SOL_SOCKET, SO_REUSEPORT, 1)
+        serverSocket.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
         serverSocket.setblocking(False)
         serverSocket.bind(('', serverPort))
         serverSocket.listen(20)
@@ -25,6 +27,7 @@ def sendBroadcast() :
         serverBroadcast = socket(AF_INET, SOCK_DGRAM)
 
         # Enable broadcasting mode
+        serverBroadcast.setsockopt(SOL_SOCKET, SO_REUSEPORT, 1)
         serverBroadcast.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
         serverBroadcast.setsockopt(SOL_SOCKET, SO_BROADCAST, 1)
 
@@ -35,7 +38,7 @@ def sendBroadcast() :
         clientList = list()
         i = 0
         while i < 10 :
-            serverBroadcast.sendto(pack('qqq', 0xfeedbeef, 0x2, 0x2ee0), ('<broadcast>', 13117))
+            serverBroadcast.sendto(pack('!IBH', 0xfeedbeef, 0x02, 0x2ee0), ('<broadcast>', 13117))
             print("message sent!")
             i += 1
             time.sleep(1)

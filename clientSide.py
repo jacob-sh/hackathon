@@ -11,7 +11,7 @@ while True:
     clientBroadcast.setsockopt(SOL_SOCKET, SO_BROADCAST, 1)
     clientBroadcast.bind(("", 13117))
     data, serverName = clientBroadcast.recvfrom(1024)
-    unpackedData = unpack('qqq', data)
+    unpackedData = unpack('>IcH', data)
     if ((unpackedData[0] != 0xfeedbeef) | (unpackedData[1] != 0x2)) :
         #return to more broadcast
         clientBroadcast.close()

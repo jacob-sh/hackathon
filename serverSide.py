@@ -2,6 +2,7 @@ from socket import *
 from struct import *
 from random import *
 from scapy import *
+from scapy.arch import get_if_addr
 import time
 import threading
 
@@ -73,7 +74,7 @@ while True:
     serverBroadcast.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
     serverBroadcast.setsockopt(SOL_SOCKET, SO_BROADCAST, 1)
 
-    print("Server started, listening on IP address %s" %gethostbyname(gethostname()))
+    print("Server started, listening on IP address %s" %get_if_addr('eth1'))
     clientList = list()
     i = 0
     while i < 10 : # send out udp packets
@@ -101,7 +102,7 @@ while True:
         temp += 1
 
     serverSocket.close()
-    gameStartMsg = '\u001b[36;1mWelcome to Keyboard Spamming Battle Royale.\n\u001b[31;1mGroup 1:\n==\n' + groupNames(clientList, 1) + '\n\u001b[34;1mGroup 2:\n==\n' + groupNames(clientList, 2)+ '\n\u001b[32;1mStart pressing keys on your keyboard as fast as you can!!\u001b[0m\n'
+    gameStartMsg ="\u001b[32m⠄⠄⠄⠄⠄⠄⣀⣀⣀⣤⣶⣿⣿⣶⣶⣶⣤⣄⣠⣴⣶⣿⣿⣿⣿⣶⣦⣄⠄⠄\n⠄⠄⣠⣴⣾⣿⠿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣦\n⢠⠾⣋⣭⣄⡀⠄⠄⠈⠙⠻⣿⣿⡿⠛⠋⠉⠉⠉⠙⠛⠿⣿⣿⣿⣿⣿⣿⣿⣿\n⡎⣾⡟⢻⣿⣷⠄⠄⠄⠄⠄⡼⣡⣾⣿⣿⣦⠄⠄⠄⠄⠄⠈⠛⢿⣿⣿⣿⣿⣿\n⡇⢿⣷⣾⣿⠟⠄⠄⠄⠄⢰⠁⣿⣇⣸⣿⣿⠄⠄⠄⠄⠄⠄⠄⣠⣼⣿⣿⣿⣿\n⢸⣦⣭⣭⣄⣤⣤⣤⣴⣶⣿⣧⡘⠻⠛⠛⠁⠄⠄⠄⠄⣀⣴⣿⣿⣿⣿⣿⣿⣿\n⠄⢉⣹⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷⣶⣦⣶⣶⣶⣶⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿\n⢰⡿⠛⠛⠛⠛⠻⠿⠿⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿\n⠸⡇⠄⠄⢀⣀⣀⠄⠄⠄⠄⠄⠉⠉⠛⠛⠻⠿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿\n⠄⠈⣆⠄⠄⢿⣿⣿⣿⣷⣶⣶⣤⣤⣀⣀⡀⠄⠄⠉⢻⣿⣿⣿⣿⣿⣿⣿⣿⣿\n⠄⠄⣿⡀⠄⠸⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠂⠄⢠⣿⣿⣿⣿⣿⣿⣿⣿⣿\n⠄⠄⣿⡇⠄⠄⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⠃⠄⢀⣼⣿⣿⣿⣿⣿⣿⣿⣿⣿\n⠄⠄⣿⡇⠄⠠⣿⣿⣿⣿⣿⣿⣿⣿⡿⠋⠄⠄⣠⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿\n⠄⠄⣿⠁⠄⠐⠛⠛⠛⠛⠉⠉⠉⠉⠄⠄⣠⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿\n⠄⠄⠻⣦⣀⣀⣀⣀⣀⣀⣤⣤⣤⣤⣶⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⠋⠄\n" + '\u001b[36;1mWelcome to Keyboard Spamming Battle Royale.\n\u001b[31;1mGroup 1:\n==\n' + groupNames(clientList, 1) + '\n\u001b[34;1mGroup 2:\n==\n' + groupNames(clientList, 2)+ '\n\u001b[32;1mStart pressing keys on your keyboard as fast as you can!!\u001b[0m\n'
     scoreList = list() # list of total chars collected per player
     endMsgList = list() # list that will contain the end message when its ready
     for tpl in clientList :

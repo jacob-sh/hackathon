@@ -1,5 +1,6 @@
 from socket import *
 from struct import *
+from scapy.arch import get_if_addr
 import time
 import sys
 import select

@@ -1,19 +1,21 @@
 from socket import *
 from struct import *
 from random import *
+from scapy import *
 import time
 import threading
 
-# color escape codes:
-# Black: \u001b[30m
-# Red: \u001b[31m
-# Green: \u001b[32m
-# Yellow: \u001b[33m
-# Blue: \u001b[34m
-# Magenta: \u001b[35m
-# Cyan: \u001b[36m
-# White: \u001b[37m
-# Reset: \u001b[0m
+    #Black: \u001b[30m
+    #Red: \u001b[31m
+    #Green: \u001b[32m
+    #Yellow: \u001b[33m
+    #Bright Yellow: \u001b[33;1m
+    #Blue: \u001b[34m
+    #Bright Blue: \u001b[34;1m
+    #Magenta: \u001b[35m
+    #Cyan: \u001b[36m
+    #White: \u001b[37m
+    #Reset: \u001b[0m
 
 def groupNames(lst, id) :
     names = ''
@@ -28,7 +30,7 @@ def sendBroadcast() :
     while True:
         serverPort = 12000
         serverSocket = socket(AF_INET, SOCK_STREAM)
-        #serverSocket.setsockopt(SOL_SOCKET, SO_REUSEPORT, 1)   #LINUX
+        serverSocket.setsockopt(SOL_SOCKET, SO_REUSEPORT, 1)
         serverSocket.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
         serverSocket.setblocking(False)
         serverSocket.bind(('', serverPort))
@@ -36,14 +38,16 @@ def sendBroadcast() :
         print ("The server is ready to receive")
 
         serverBroadcast = socket(AF_INET, SOCK_DGRAM)
-
-        # Enable broadcasting mode
-        #serverBroadcast.setsockopt(SOL_SOCKET, SO_REUSEPORT, 1)    #LINUX
-        serverBroadcast.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
-        serverBroadcast.setsockopt(SOL_SOCKET, SO_BROADCAST, 1)
         serverBroadcast.setblocking(False)
 
-        print("Server started...")
+        # Enable broadcasting mode
+        serverBroadcast.setsockopt(SOL_SOCKET, SO_REUSEPORT, 1)
+        serverBroadcast.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
+        serverBroadcast.setsockopt(SOL_SOCKET, SO_BROADCAST, 1)
+
+        # Set a timeout so the socket does not block
+        # indefinitely when trying to receive data.gethostbyname
+        print("Server started, listening on IP address %s" %gethostbyname(gethostname()))
         clientList = list()
         i = 0
         while i < 10 :
@@ -64,7 +68,8 @@ def sendBroadcast() :
             except:
                 break
             temp += 1
-        gameStartMsg = 'Welcome to Keyboard Spamming Battle Royale.\nGroup 1:\n==\n' + groupNames(clientList, 1) + 'Group 2:\n==\n' + groupNames(clientList, 2)+ '\nStart pressing keys on your keyboard as fast as you can!!\n'
+
+        gameStartMsg = '\u001b[36mWelcome to Keyboard Spamming Battle Royale.\n\u001b[31mGroup 1:\n==\n' + groupNames(clientList, 1) + '\n\u001b[34;1mGroup 2:\n==\n' + groupNames(clientList, 2)+ '\n\u001b[32mStart pressing keys on your keyboard as fast as you can!!\n'
         scoreList = list()
         endMsgList = list()
         for tpl in clientList :
@@ -79,11 +84,13 @@ def sendBroadcast() :
             else:
                 sum2 += result[0]
         if(sum1 > sum2):
-            winnerInfo = ('Group 1' , groupNames(clientList, 1))
+            winnerInfo = ('\u001b[31mGroup 1 wins!' , groupNames(clientList, 1))  
+        elif(sum1 < sum2):
+            winnerInfo = ('\u001b[34;1mGroup 2 wins!' , groupNames(clientList, 2))
         else:
-            winnerInfo = ('Group 2' , groupNames(clientList, 2))
-        endMsgList.append('Game over!\nGroup 1 typed in ' + str(sum1) + ' characters. Group 2 typed in ' + str(sum2) + ' characters.\n' + winnerInfo[0] + ' wins!\n\nCongratulations to the winners:\n==\n' + winnerInfo[1])
-        print ('Game over, sending out offer requests...')
+            winnerInfo = ('It\'s a Tie!', 'Both groups won') #make it prettier
+        endMsgList.append('Game over!\n\u001b[31mGroup 1 typed in ' + str(sum1) + ' characters. \u001b[34;1mGroup 2 typed in ' + str(sum2) + ' characters.\n' + winnerInfo[0] + '\n\n\u001b[33;1mCongratulations to the winners:\n==\n' + winnerInfo[1] +'\u001b[0m')
+        print ('\u001b[0mGame over, sending out offer requests...')
         serverSocket.close()
         serverBroadcast.close()
 

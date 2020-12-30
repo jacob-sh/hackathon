@@ -6,7 +6,7 @@ import select
 import tty
 import termios
 
-def isData():
+def dataAvailable():
     return select.select([sys.stdin], [], [], 0) == ([sys.stdin], [], [])
 
 while True:
@@ -18,7 +18,10 @@ while True:
     clientBroadcast.setsockopt(SOL_SOCKET, SO_BROADCAST, 1)
     clientBroadcast.bind(("", 13117))
     data, serverName = clientBroadcast.recvfrom(1024)
-    unpackedData = unpack('!IBH', data)
+    try:
+        unpackedData = unpack('!IBH', data)
+    except:
+        unpackedData = (0, 0, 0)
     if ((unpackedData[0] != 0xfeedbeef) | (unpackedData[1] != 0x02)) :
         #return to more broadcast
         clientBroadcast.close()
@@ -41,14 +44,14 @@ while True:
             continue
 
         timeout = time.time() + 10
-        old_settings = termios.tcgetattr(sys.stdin)
+        originalAttributes = termios.tcgetattr(sys.stdin)
         try:
             tty.setcbreak(sys.stdin.fileno())
             while time.time() < timeout :
-                if isData():
+                if dataAvailable():
                     clientSocket.send(sys.stdin.read(1).encode())
         finally:
-            termios.tcsetattr(sys.stdin, termios.TCSADRAIN, old_settings)
+            termios.tcsetattr(sys.stdin, termios.TCSADRAIN, originalAttributes)
 
         try:
             endMsg = clientSocket.recv(2048).decode()

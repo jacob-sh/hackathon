@@ -45,8 +45,6 @@ def sendBroadcast() :
         serverBroadcast.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
         serverBroadcast.setsockopt(SOL_SOCKET, SO_BROADCAST, 1)
 
-        # Set a timeout so the socket does not block
-        # indefinitely when trying to receive data.gethostbyname
         print("Server started, listening on IP address %s" %gethostbyname(gethostname()))
         clientList = list()
         i = 0

@@ -13,6 +13,7 @@ def dataAvailable(): # checks if there is input in stdin
 while True:
     print ('Client started, listening for offer requests')
     serverPort = 0
+    
     # start udp socket and begin listening
     clientBroadcast = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)
     clientBroadcast.setsockopt(SOL_SOCKET, SO_REUSEPORT, 1)
@@ -21,6 +22,7 @@ while True:
     clientBroadcast.bind(("", 13117))
     data, serverName = clientBroadcast.recvfrom(1024)
     clientBroadcast.close()
+    
     # unpack received data
     try:
         unpackedData = unpack('!IBH', data)
@@ -32,14 +34,17 @@ while True:
     else:
         serverPort = unpackedData[2]
         print("Received offer from %s, attempting to connect..."%serverName[0])
+        
+        # start tcp socket
         try:
-            # start tcp socket
             clientSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)
             clientSocket.connect((serverName[0], serverPort))
             clientSocket.settimeout(15.0)
             teamName = 'THE MOST POGGED TEAM'
+            
             #send team name
             clientSocket.sendall(teamName.encode())
+            
             # print starting message
             gameStartMsg = clientSocket.recv(2048).decode()
             print (gameStartMsg)
@@ -47,6 +52,7 @@ while True:
             print('Server disconnected, timeout reached - listening for offer requests...')
             clientSocket.close()
             continue
+        
         # begin sending characters
         clientSocket.settimeout(1.0)
         timeout = time.time() + 10
@@ -62,6 +68,7 @@ while True:
             continue
         finally:
             termios.tcsetattr(sys.stdin, termios.TCSADRAIN, originalAttributes)
+        
         # print end message
         try:
             clientSocket.settimeout(2.0)

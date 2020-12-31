@@ -7,18 +7,37 @@ import select
 import tty
 import termios
 
-def dataAvailable(): # checks if there is input in stdin
-    return select.select([sys.stdin], [], [], 0) == ([sys.stdin], [], [])
+def disconnectClient(sock):
+    print('Server disconnected, timeout reached - listening for offer requests...')
+    sock.close()
 
+def sendCharsToServer(sock):
+    timeout = time.time() + 10
+    originalAttributes = termios.tcgetattr(sys.stdin)
+    try:
+        tty.setcbreak(sys.stdin.fileno())
+        while time.time() < timeout :
+            if (select.select([sys.stdin], [], [], 0) == ([sys.stdin], [], [])) :
+                sock.sendall(sys.stdin.read(1).encode())
+        return True
+    except:
+        return False
+    finally:
+        termios.tcsetattr(sys.stdin, termios.TCSADRAIN, originalAttributes)
+
+def openSocket(socktype, proto, broadcast):
+    sock = socket(AF_INET, socktype, proto)
+    sock.setsockopt(SOL_SOCKET, SO_REUSEPORT, 1)
+    sock.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
+    sock.setsockopt(SOL_SOCKET, SO_BROADCAST, broadcast) #enable broadcasting mode for udp packet
+    return sock
+
+# main loop for client
 while True:
     print ('Client started, listening for offer requests')
-    serverPort = 0
     
     # start udp socket and begin listening
-    clientBroadcast = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)
-    clientBroadcast.setsockopt(SOL_SOCKET, SO_REUSEPORT, 1)
-    clientBroadcast.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
-    clientBroadcast.setsockopt(SOL_SOCKET, SO_BROADCAST, 1)
+    clientBroadcast = openSocket(SOCK_DGRAM, IPPROTO_UDP, 1)
     clientBroadcast.bind(("", 13117))
     data, serverName = clientBroadcast.recvfrom(1024)
     clientBroadcast.close()
@@ -29,7 +48,7 @@ while True:
     except:
         unpackedData = (0, 0, 0)
     if ((unpackedData[0] != 0xfeedbeef) | (unpackedData[1] != 0x02)) :
-        # not expected udp packet, go back to listening
+        # incorrect udp packet format, go back to listening
         continue
     else:
         serverPort = unpackedData[2]
@@ -49,33 +68,19 @@ while True:
             gameStartMsg = clientSocket.recv(2048).decode()
             print (gameStartMsg)
         except:
-            print('Server disconnected, timeout reached - listening for offer requests...')
-            clientSocket.close()
+            disconnectClient(clientSocket)
             continue
         
         # begin sending characters
-        clientSocket.settimeout(1.0)
-        timeout = time.time() + 10
-        originalAttributes = termios.tcgetattr(sys.stdin)
-        try:
-            tty.setcbreak(sys.stdin.fileno())
-            while time.time() < timeout :
-                if dataAvailable():
-                    clientSocket.sendall(sys.stdin.read(1).encode())
-        except:
-            print('Server disconnected, timeout reached - listening for offer requests...')
-            clientSocket.close()
-            continue
-        finally:
-            termios.tcsetattr(sys.stdin, termios.TCSADRAIN, originalAttributes)
-        
-        # print end message
-        try:
-            clientSocket.settimeout(2.0)
-            endMsg = clientSocket.recv(2048).decode()
-            print ("%s"%endMsg)
-            clientSocket.close()
-            print('Server disconnected, listening for offer requests...')
-        except:
-            print('Server disconnected, timeout reached - listening for offer requests...')
-            clientSocket.close()
+        clientSocket.settimeout(2.0)
+        if (sendCharsToServer(clientSocket)):
+            try:
+                # print end message
+                endMsg = clientSocket.recv(2048).decode()
+                print ("%s"%endMsg)
+                clientSocket.close()
+                print('Server disconnected, listening for offer requests...')
+            except:
+                disconnectClient(clientSocket)
+        else:
+            disconnectClient(clientSocket)

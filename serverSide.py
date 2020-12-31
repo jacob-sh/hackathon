@@ -1,36 +1,88 @@
 from socket import *
 from struct import *
-from random import *
-from scapy import *
 from scapy.arch import get_if_addr
 import time
 import threading
 
-# color escape codes
-#Black: '\u001b[30m'
-#Red: '\u001b[31m'
-#Green: '\u001b[32m'
-#Yellow: '\u001b[33m'
-#Bright_Yellow: '\u001b[33;1m'
-#Blue: '\u001b[34m'
-#Bright_Blue: '\u001b[34;1m'
-#Magenta: '\u001b[35m'
-#Cyan: '\u001b[36m'
-#White: '\u001b[37m'
-#Reset: '\u001b[0m'
+#this is why we are "THE MOST POGGED TEAM"
+poggy = """
+⠄⠄⠄⠄⠄⠄⣀⣀⣀⣤⣶⣿⣿⣶⣶⣶⣤⣄⣠⣴⣶⣿⣿⣿⣿⣶⣦⣄⠄⠄
+⠄⠄⣠⣴⣾⣿⠿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣦
+⢠⠾⣋⣭⣄⡀⠄⠄⠈⠙⠻⣿⣿⡿⠛⠋⠉⠉⠉⠙⠛⠿⣿⣿⣿⣿⣿⣿⣿⣿
+⡎⣾⡟⢻⣿⣷⠄⠄⠄⠄⠄⡼⣡⣾⣿⣿⣦⠄⠄⠄⠄⠄⠈⠛⢿⣿⣿⣿⣿⣿
+⡇⢿⣷⣾⣿⠟⠄⠄⠄⠄⢰⠁⣿⣇⣸⣿⣿⠄⠄⠄⠄⠄⠄⠄⣠⣼⣿⣿⣿⣿
+⢸⣦⣭⣭⣄⣤⣤⣤⣴⣶⣿⣧⡘⠻⠛⠛⠁⠄⠄⠄⠄⣀⣴⣿⣿⣿⣿⣿⣿⣿
+⠄⢉⣹⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷⣶⣦⣶⣶⣶⣶⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
+⢰⡿⠛⠛⠛⠛⠻⠿⠿⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
+⠸⡇⠄⠄⢀⣀⣀⠄⠄⠄⠄⠄⠉⠉⠛⠛⠻⠿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
+⠄⠈⣆⠄⠄⢿⣿⣿⣿⣷⣶⣶⣤⣤⣀⣀⡀⠄⠄⠉⢻⣿⣿⣿⣿⣿⣿⣿⣿⣿
+⠄⠄⣿⡀⠄⠸⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠂⠄⢠⣿⣿⣿⣿⣿⣿⣿⣿⣿
+⠄⠄⣿⡇⠄⠄⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⠃⠄⢀⣼⣿⣿⣿⣿⣿⣿⣿⣿⣿
+⠄⠄⣿⡇⠄⠠⣿⣿⣿⣿⣿⣿⣿⣿⡿⠋⠄⠄⣠⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿
+⠄⠄⣿⠁⠄⠐⠛⠛⠛⠛⠉⠉⠉⠉⠄⠄⣠⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿
+⠄⠄⠻⣦⣀⣀⣀⣀⣀⣀⣤⣤⣤⣤⣶⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⠋⠄\n""" 
 
-def groupNames(lst, id) : # print group names
+# color escape codes
+green = '\u001b[32m'
+bright_green = '\u001b[32;1m'
+bright_red = '\u001b[31;1m'
+bright_yellow = '\u001b[33;1m'
+bright_blue = '\u001b[34;1m'
+magenta = '\u001b[35m'
+bright_cyan = '\u001b[36;1m'
+reset_color = '\u001b[0m'
+
+# each player gets an id corresponding to their group
+group1_id = 1
+group2_id = 2
+
+def groupNames(clientList, groupId) : # print group names
     names = ''
-    i = 0
-    while i < len(lst) :
-        if (lst[i][2] == id) :
-            names += lst[i][0]+'\n'
-        i += 1
+    for i in range(len(clientList)) :
+        if (clientList[i][2] == groupId) :
+            names += clientList[i][0]+'\n'
     return names
 
+def generateStartMsg(clientList):
+    return green + poggy + bright_cyan + 'Welcome to Keyboard Spamming Battle Royale.\n' + bright_red + 'Group 1:\n==\n' + groupNames(clientList, group1_id) + '\n' + bright_blue + 'Group 2:\n==\n' + groupNames(clientList, group2_id) + '\n' + bright_green + 'Start pressing keys on your keyboard as fast as you can!!' + reset_color + '\n'
+
+def openSocket(socktype, proto, broadcast):
+    sock = socket(AF_INET, socktype, proto)
+    sock.setsockopt(SOL_SOCKET, SO_REUSEPORT, 1)
+    sock.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
+    sock.setsockopt(SOL_SOCKET, SO_BROADCAST, broadcast) # enable/disable broadcasting mode for udp packet
+    sock.setblocking(False)
+    return sock
+
+def generateEndGameMsg(clientList, scoreList):
+    # calculate final tally
+    sum1 = 0 # team 1 score
+    sum2 = 0 # team 2 score
+    for result in scoreList :
+        if(result[1] == 1):
+            sum1 += result[0]
+        else:
+            sum2 += result[0]
+
+    # declare winner and generate the end game message
+    if(sum1 > sum2):
+        winnerInfo = (bright_red + 'Group 1 wins!' , groupNames(clientList, group1_id))  
+    elif(sum1 < sum2):
+        winnerInfo = (bright_blue + 'Group 2 wins!' , groupNames(clientList, group2_id))
+    else:
+        winnerInfo = (magenta + 'It\'s a Tie!', 'Both groups won\n' +  groupNames(clientList, group1_id) + groupNames(clientList, group2_id))
+    return 'Game over!\n'+ bright_red +'Group 1 typed in ' + str(sum1) + ' characters. ' + bright_blue + 'Group 2 typed in ' + str(sum2) + ' characters.\n' + winnerInfo[0] + '\n\n'+ bright_yellow + 'Congratulations to the winners:\n==\n' + winnerInfo[1] + reset_color
+
+def sendUdpPackets (sock) :
+    for i in range(10) : 
+        sock.sendto(pack('!IBH', 0xfeedbeef, 0x02, 0x0816), ('<broadcast>', 13117))
+        print("message sent!")
+        time.sleep(1)
+    return False
+    
 #gaming
-def gaming (id, sock, scoreList, startMsg, endMsg) : # thread function
-    lst = list() # list of every character sent by the player
+def gaming (groupId, sock, scoreList, startMsg, endMsg) : # thread function
+    inputlist = list() # list of every character sent by the player
     try:
         # send starting message
         sock.sendall(startMsg.encode())
@@ -39,12 +91,12 @@ def gaming (id, sock, scoreList, startMsg, endMsg) : # thread function
         # receive characters
         while time.time() < timeout :
             try:
-                sentChar = sock.recv(1024).decode()
-                if(len(sentChar) == 1):
-                    lst.append(sentChar)
+                receivedChar = sock.recv(1024).decode()
+                if(len(receivedChar) == 1):
+                    inputlist.append(receivedChar)
             except:
                 continue
-        scoreList.append((len(lst), id)) # send the char count to the main thread
+        scoreList.append((len(inputlist), groupId)) # send the char count to the main thread
         
         # wait for the end message from the main thread
         try: 
@@ -54,17 +106,15 @@ def gaming (id, sock, scoreList, startMsg, endMsg) : # thread function
         except:
             sock.close()
     except:
-        scoreList.append((len(lst), id))
+        scoreList.append((len(inputlist), groupId))
     sock.close()
     return False
 
+# main loop for server
 while True:
     # start server tcp reception socket
     serverPort = 2070
-    serverSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)
-    serverSocket.setsockopt(SOL_SOCKET, SO_REUSEPORT, 1)
-    serverSocket.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
-    serverSocket.setblocking(False)
+    serverSocket = openSocket(SOCK_STREAM, IPPROTO_TCP, 0)
     serverSocket.bind(('', serverPort))
 
     # begin listening on tcp socket
@@ -72,29 +122,18 @@ while True:
     print ("The server is ready to receive")
 
     # start server udp socket
-    serverBroadcast = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)
-    serverBroadcast.setblocking(False)
-
-    # enable broadcasting mode for udp packet
-    serverBroadcast.setsockopt(SOL_SOCKET, SO_REUSEPORT, 1)
-    serverBroadcast.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
-    serverBroadcast.setsockopt(SOL_SOCKET, SO_BROADCAST, 1)
-
+    serverBroadcast = openSocket(SOCK_DGRAM, IPPROTO_UDP, 1)
     print("Server started, listening on IP address %s" %get_if_addr('eth1'))
+    
+    # begin sending udp packets
+    udpThread = threading.Thread(target = sendUdpPackets, args = (serverBroadcast,))
+    udpThread.start()
+
+    # accept all waiting players
     clientList = list()
-    i = 0
-
-    # send out udp packets
-    while i < 10 : 
-        serverBroadcast.sendto(pack('!IBH', 0xfeedbeef, 0x02, 0x0816), ('<broadcast>', 13117))
-        print("message sent!")
-        i += 1
-        time.sleep(1)
-    serverBroadcast.close()
-
-    # enter all waiting players
-    temp = 0
-    while True:
+    groupDistributor = 0
+    timeout = time.time() + 10
+    while time.time() < timeout:
         try:
             connectionSocket, addr = serverSocket.accept()
             connectionSocket.settimeout(0.2)
@@ -103,18 +142,21 @@ while True:
                 connectionSocket.setblocking(False)
             except:
                 continue
-            if(temp % 2 == 0):
-                clientList.append((clientName.decode(), connectionSocket, 1))
+            if(groupDistributor % 2 == 0): # assign players to their groups
+                clientList.append((clientName.decode(), connectionSocket, group1_id)) 
             else:
-                clientList.append((clientName.decode(), connectionSocket, 2))
+                clientList.append((clientName.decode(), connectionSocket, group2_id))
         except:
-            break
-        temp += 1
-
+            continue
+        groupDistributor += 1
+    
+    # end client solicitation state
+    udpThread.join()
+    serverBroadcast.close()
     serverSocket.close()
 
     # begin game
-    gameStartMsg ="\u001b[32m⠄⠄⠄⠄⠄⠄⣀⣀⣀⣤⣶⣿⣿⣶⣶⣶⣤⣄⣠⣴⣶⣿⣿⣿⣿⣶⣦⣄⠄⠄\n⠄⠄⣠⣴⣾⣿⠿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣦\n⢠⠾⣋⣭⣄⡀⠄⠄⠈⠙⠻⣿⣿⡿⠛⠋⠉⠉⠉⠙⠛⠿⣿⣿⣿⣿⣿⣿⣿⣿\n⡎⣾⡟⢻⣿⣷⠄⠄⠄⠄⠄⡼⣡⣾⣿⣿⣦⠄⠄⠄⠄⠄⠈⠛⢿⣿⣿⣿⣿⣿\n⡇⢿⣷⣾⣿⠟⠄⠄⠄⠄⢰⠁⣿⣇⣸⣿⣿⠄⠄⠄⠄⠄⠄⠄⣠⣼⣿⣿⣿⣿\n⢸⣦⣭⣭⣄⣤⣤⣤⣴⣶⣿⣧⡘⠻⠛⠛⠁⠄⠄⠄⠄⣀⣴⣿⣿⣿⣿⣿⣿⣿\n⠄⢉⣹⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷⣶⣦⣶⣶⣶⣶⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿\n⢰⡿⠛⠛⠛⠛⠻⠿⠿⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿\n⠸⡇⠄⠄⢀⣀⣀⠄⠄⠄⠄⠄⠉⠉⠛⠛⠻⠿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿\n⠄⠈⣆⠄⠄⢿⣿⣿⣿⣷⣶⣶⣤⣤⣀⣀⡀⠄⠄⠉⢻⣿⣿⣿⣿⣿⣿⣿⣿⣿\n⠄⠄⣿⡀⠄⠸⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠂⠄⢠⣿⣿⣿⣿⣿⣿⣿⣿⣿\n⠄⠄⣿⡇⠄⠄⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⠃⠄⢀⣼⣿⣿⣿⣿⣿⣿⣿⣿⣿\n⠄⠄⣿⡇⠄⠠⣿⣿⣿⣿⣿⣿⣿⣿⡿⠋⠄⠄⣠⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿\n⠄⠄⣿⠁⠄⠐⠛⠛⠛⠛⠉⠉⠉⠉⠄⠄⣠⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿\n⠄⠄⠻⣦⣀⣀⣀⣀⣀⣀⣤⣤⣤⣤⣶⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⠋⠄\n" + '\u001b[36;1mWelcome to Keyboard Spamming Battle Royale.\n\u001b[31;1mGroup 1:\n==\n' + groupNames(clientList, 1) + '\n\u001b[34;1mGroup 2:\n==\n' + groupNames(clientList, 2)+ '\n\u001b[32;1mStart pressing keys on your keyboard as fast as you can!!\u001b[0m\n'
+    gameStartMsg = generateStartMsg(clientList)
     scoreList = list() # list of total chars collected per player
     endMsgList = list() # list that will contain the end message when its ready
     
@@ -126,22 +168,5 @@ while True:
     while (len(scoreList) < len(clientList)):
         time.sleep(1)
 
-    # calculate final tally
-    sum1 = 0 # team 1 score
-    sum2 = 0 # team 2 score
-    for result in scoreList :
-        if(result[1] == 1):
-            sum1 += result[0]
-        else:
-            sum2 += result[0]
-    
-    # declare winner and end game
-    if(sum1 > sum2):
-        winnerInfo = ('\u001b[31;1mGroup 1 wins!' , groupNames(clientList, 1))  
-    elif(sum1 < sum2):
-        winnerInfo = ('\u001b[34;1mGroup 2 wins!' , groupNames(clientList, 2))
-    else:
-        winnerInfo = ('\u001b[35mIt\'s a Tie!', 'Both groups won')
-    endMsgList.append('Game over!\n\u001b[31;1mGroup 1 typed in ' + str(sum1) + ' characters. \u001b[34;1mGroup 2 typed in ' + str(sum2) + ' characters.\n' + winnerInfo[0] + '\n\n\u001b[33;1mCongratulations to the winners:\n==\n' + winnerInfo[1] +'\u001b[0m')
-    print ('\u001b[0mGame over, sending out offer requests...')
-
+    endMsgList.append(generateEndGameMsg(clientList, scoreList))
+    print (reset_color + 'Game over, sending out offer requests...')
